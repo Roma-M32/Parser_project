@@ -42,6 +42,38 @@
    ```bash
    python3 selenium_parser.py
 
+## 🗄 Сохранение данных в PostgreSQL
+
+Теперь парсер автоматически сохраняет статьи в базу данных **PostgreSQL** с помощью **SQLAlchemy**.
+
+### 📌 Как настроить базу?
+1. Установите PostgreSQL:
+   ```bash
+   sudo apt install postgresql  # Ubuntu/Linux
+   brew install postgresql  # macOS
+
+2. Создайте базу:
+   ```sql
+   CREATE DATABASE parser_db;
+   CREATE USER parser_user WITH PASSWORD 'password';
+   GRANT ALL PRIVILEGES ON DATABASE parser_db TO parser_user;
+
+3. Установите зависимости:
+   ```bash
+   pip install sqlalchemy psycopg2 dotenv
+
+4. Создайте .env файл и добавьте:
+   ```bash
+   DATABASE_URL=postgresql://USERNAME:PASSWORD@localhost/DATABASE
+
+5. Запустите парсер:
+   ```bash
+   python3 parser.py
+
+6. Данные будут сохраняться в PostgreSQL, а проверить их можно так:
+   ```sql
+   SELECT * FROM articles;
+
 ## 🎯 TODO (Идеи для улучшения)
  Отправка статей в Telegram
 
