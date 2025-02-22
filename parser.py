@@ -2,6 +2,8 @@ import requests
 import logging
 import json
 from bs4 import BeautifulSoup
+import schedule
+import time
 
 # Настраиваем логирование
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -39,6 +41,20 @@ def get_articles():
     except requests.exceptions.RequestException as e:
         logging.error(f"❌ Ошибка при запросе: {e}")
         return []
+
+def run_parser():
+    print("🔄 Запуск парсера...")
+    get_articles()  # Вызываем функцию парсинга
+
+# Запускаем парсер каждые 10 минут
+schedule.every(10).minutes.do(run_parser)
+
+print("✅ Парсер теперь работает по расписанию!")
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)  # Проверяем задачи каждую минуту
+
 
 if __name__ == "__main__":
     get_articles()
