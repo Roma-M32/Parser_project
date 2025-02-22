@@ -4,6 +4,7 @@ import json
 from bs4 import BeautifulSoup
 import schedule
 import time
+from database import SessionLocal, Article
 
 # Настраиваем логирование
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -14,8 +15,20 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 
+def save_to_db(data):
+    """Сохранение статей в PostgreSQL"""
+    session = SessionLocal()
+    
+    for item in data:
+        article = Article(title=item["title"])
+        session.add(article)
+    
+    session.commit()
+    session.close()
+    print("📌 Данные сохранены в базу!")
+
 def get_articles():
-    """Функция парсит статьи с Habr и сохраняет в JSON"""
+    """Функция парсит статьи с Habr и сохраняет в JSON и базу"""
     try:
         logging.info("🔍 Отправляем запрос на сайт...")
         response = requests.get(URL, headers=HEADERS)
@@ -36,7 +49,9 @@ def get_articles():
             json.dump(data, f, ensure_ascii=False, indent=4)
 
         logging.info("📁 Данные сохранены в articles.json")
-        return data
+        
+        # Сохраняем в базу
+        save_to_db(data)
 
     except requests.exceptions.RequestException as e:
         logging.error(f"❌ Ошибка при запросе: {e}")
@@ -51,10 +66,9 @@ schedule.every(10).minutes.do(run_parser)
 
 print("✅ Парсер теперь работает по расписанию!")
 
+if __name__ == "__main__":
+    get_articles()
+
 while True:
     schedule.run_pending()
     time.sleep(60)  # Проверяем задачи каждую минуту
-
-
-if __name__ == "__main__":
-    get_articles()
